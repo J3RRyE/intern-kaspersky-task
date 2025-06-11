@@ -1,0 +1,31 @@
+services:
+  display-server:
+    build: .
+    env_file: 
+      - .env
+    environment:
+      - DOCKER_DISPLAY_PORT=${DOCKER_DISPLAY_PORT?error}
+    container_name: display-server
+    command: ["./build/display_server", "${DOCKER_DISPLAY_PORT}"]
+    networks:
+      - app-network
+
+  processing-server:
+    build: .
+    env_file: 
+      - .env
+    environment:
+      - DOCKER_DISPLAY_PORT=${DOCKER_DISPLAY_PORT?error}
+      - DOCKER_PROCESS_PORT=${DOCKER_PROCESS_PORT?error}
+    container_name: processing-server
+    command: ["./build/processing_server", "${DOCKER_PROCESS_PORT}", "display-server", "${DOCKER_DISPLAY_PORT}"]
+    ports:
+      - "8766:8766"
+    depends_on:
+      - display-server
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
